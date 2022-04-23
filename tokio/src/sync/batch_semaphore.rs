@@ -535,6 +535,8 @@ impl Future for Acquire<'_> {
             crate::coop::poll_proceed(cx),
         ));
 
+        println!("aaaaaa START Acquire::poll",);
+
         #[cfg(not(all(tokio_unstable, feature = "tracing")))]
         let coop = ready!(crate::coop::poll_proceed(cx));
 
@@ -550,6 +552,8 @@ impl Future for Acquire<'_> {
                 Ready(Ok(()))
             }
         };
+
+        println!("aaaaaa END Acquire::poll",);
 
         #[cfg(all(tokio_unstable, feature = "tracing"))]
         return trace_poll_op!("poll_acquire", result);

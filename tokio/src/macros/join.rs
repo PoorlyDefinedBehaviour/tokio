@@ -71,22 +71,52 @@ macro_rules! join {
         // the requirement of `Pin::new_unchecked` called below.
         let mut futures = ( $( maybe_done($e), )* );
 
+        // How many futures were passed to join!.
+        const FUTURE_COUNT: u32 = $crate::count!( $($count)* );
+
+        // When poll_fn is polled, start polling the future at this index.
+        let mut start_index = 0;
+
         poll_fn(move |cx| {
             let mut is_pending = false;
 
-            $(
-                // Extract the future for this branch from the tuple.
-                let ( $($skip,)* fut, .. ) = &mut futures;
+            println!("aaaaaa START poll_fn");
 
-                // Safety: future is stored on the stack above
-                // and never moved.
-                let mut fut = unsafe { Pin::new_unchecked(fut) };
+            for i in 0..FUTURE_COUNT {
+                let turn;
 
-                // Try polling
-                if fut.poll(cx).is_pending() {
-                    is_pending = true;
-                }
-            )*
+                #[allow(clippy::modulo_one)]
+                {
+                    turn = (start_index + i) % FUTURE_COUNT
+                };
+
+                $(
+                    // If it is this future's turn to be polled
+                    if turn == $crate::count!( $($skip)* ) {
+                        println!("Will poll future number {}", $crate::count!( $($skip)* ));
+                        // Extract the future for this branch from the tuple.
+                        let ( $($skip,)* fut, .. ) = &mut futures;
+
+                        // Safety: future is stored on the stack above
+                        // and never moved.
+                        let mut fut = unsafe { Pin::new_unchecked(fut) };
+
+                        // Try polling
+                        if fut.poll(cx).is_pending() {
+                            is_pending = true;
+                        }
+                  }
+
+              )*
+            }
+
+            println!("aaaaaa END poll_fn");
+
+            // Start by polling the next future first the next time poll_fn is polled
+            #[allow(clippy::modulo_one)]
+            {
+                start_index = (start_index + 1) % FUTURE_COUNT;
+            }
 
             if is_pending {
                 Pending

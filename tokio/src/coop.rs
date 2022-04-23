@@ -170,6 +170,8 @@ cfg_coop! {
         CURRENT.with(|cell| {
             let mut budget = cell.get();
 
+            println!("aaaaaa budget {:?}", budget);
+
             if budget.decrement() {
                 let restore = RestoreOnPending(Cell::new(cell.get()));
                 cell.set(budget);

@@ -69,31 +69,39 @@ macro_rules! join {
 
         // Safety: nothing must be moved out of `futures`. This is to satisfy
         // the requirement of `Pin::new_unchecked` called below.
-        let mut futures = ( $( maybe_done($e), )* );
+        let mut futures = [ $( maybe_done($e), )* ];
 
         poll_fn(move |cx| {
+            let mut offset = 0_usize;
             let mut is_pending = false;
 
-            $(
-                // Extract the future for this branch from the tuple.
-                let ( $($skip,)* fut, .. ) = &mut futures;
+            for i in 0..futures.len() {
+                let index = offset.wrapping_add(i) % futures.len();
 
+                let fut = &mut futures[index];
                 // Safety: future is stored on the stack above
                 // and never moved.
                 let mut fut = unsafe { Pin::new_unchecked(fut) };
 
                 // Try polling
                 if fut.poll(cx).is_pending() {
+                    // If this is the first future that returned Poll::Pending,
+                    // start by polling this future first the next time poll_fn is polled.
+                    if !is_pending {
+                        offset = index;
+                    }
                     is_pending = true;
                 }
-            )*
+
+
+            }
 
             if is_pending {
                 Pending
             } else {
                 Ready(($({
                     // Extract the future for this branch from the tuple.
-                    let ( $($skip,)* fut, .. ) = &mut futures;
+                    let [ $($skip,)* fut, .. ] = &mut futures;
 
                     // Safety: future is stored on the stack above
                     // and never moved.

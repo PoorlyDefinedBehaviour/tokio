@@ -17,6 +17,7 @@
 #[allow(unused_extern_crates)]
 extern crate proc_macro;
 
+mod count;
 mod entry;
 mod select;
 
@@ -335,4 +336,22 @@ pub fn select_priv_declare_output_enum(input: TokenStream) -> TokenStream {
 #[doc(hidden)]
 pub fn select_priv_clean_pattern(input: TokenStream) -> TokenStream {
     select::clean_pattern_macro(input)
+}
+
+#[proc_macro]
+#[doc(hidden)]
+pub fn count_proc_macro(input: TokenStream) -> TokenStream {
+    count::count(input)
+}
+
+#[proc_macro]
+#[doc(hidden)]
+pub fn count_proc_macro2(input: TokenStream) -> TokenStream {
+    count::count(input)
+}
+
+#[proc_macro]
+#[doc(hidden)]
+pub fn join_v2(input: TokenStream) -> TokenStream {
+    count::test(input)
 }

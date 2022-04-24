@@ -528,6 +528,14 @@ cfg_macros! {
     #[doc(hidden)]
     pub use tokio_macros::select_priv_clean_pattern;
 
+    /// Implementation detail of the `join!` macro. This macro is **not**
+    /// intended to be used as part of the public API and is permitted to
+    /// change.
+    #[doc(hidden)]
+    pub use tokio_macros::count_proc_macro;
+    pub use tokio_macros::count_proc_macro2;
+    pub use tokio_macros::join_v2;
+
     cfg_rt! {
         #[cfg(feature = "rt-multi-thread")]
         #[cfg(not(test))] // Work around for rust-lang/rust#62127

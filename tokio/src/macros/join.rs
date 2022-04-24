@@ -80,6 +80,8 @@ macro_rules! join {
         poll_fn(move |cx| {
             let mut is_pending = false;
 
+            println!("aaaaaa START poll_fn. start_index={}", start_index);
+
             for i in 0..FUTURE_COUNT {
                 let turn;
 
@@ -92,6 +94,7 @@ macro_rules! join {
                   $(
                       #[allow(unreachable_code)]
                       $crate::count!( $($skip)* ) => {
+                          println!("aaaaaa polling future number {:?}", turn);
                           let ( $($skip,)* fut, .. ) = &mut futures;
 
                           // Safety: future is stored on the stack above
@@ -107,6 +110,8 @@ macro_rules! join {
                   _ => unreachable!("reaching this means there probably is an off by one bug")
                 }
             }
+
+            println!("aaaaaa END poll_fn");
 
             if is_pending {
                 // Start by polling the next future first the next time poll_fn is polled

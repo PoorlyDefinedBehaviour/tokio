@@ -71,24 +71,50 @@ macro_rules! join {
         // the requirement of `Pin::new_unchecked` called below.
         let mut futures = ( $( maybe_done($e), )* );
 
+        // How many futures were passed to join!.
+        const FUTURE_COUNT: u32 = $crate::count!( $($count)* );
+
+        // When poll_fn is polled, start polling the future at this index.
+        let mut start_index = 0;
+
         poll_fn(move |cx| {
             let mut is_pending = false;
 
-            $(
-                // Extract the future for this branch from the tuple.
-                let ( $($skip,)* fut, .. ) = &mut futures;
+            for i in 0..FUTURE_COUNT {
+                let turn;
 
-                // Safety: future is stored on the stack above
-                // and never moved.
-                let mut fut = unsafe { Pin::new_unchecked(fut) };
+                #[allow(clippy::modulo_one)]
+                {
+                    turn = (start_index + i) % FUTURE_COUNT
+                };
 
-                // Try polling
-                if fut.poll(cx).is_pending() {
-                    is_pending = true;
+                match turn {
+                  $(
+                      #[allow(unreachable_code)]
+                      $crate::count!( $($skip)* ) => {
+                          let ( $($skip,)* fut, .. ) = &mut futures;
+
+                          // Safety: future is stored on the stack above
+                          // and never moved.
+                          let mut fut = unsafe { Pin::new_unchecked(fut) };
+
+                          // Try polling
+                          if fut.poll(cx).is_pending() {
+                              is_pending = true;
+                          }
+                      }
+                  )*
+                  _ => unreachable!("reaching this means there probably is an off by one bug")
                 }
-            )*
+            }
 
             if is_pending {
+                // Start by polling the next future first the next time poll_fn is polled
+                #[allow(clippy::modulo_one)]
+                {
+                    start_index = (start_index + 1) % FUTURE_COUNT;
+                }
+
                 Pending
             } else {
                 Ready(($({

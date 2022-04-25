@@ -26,17 +26,18 @@ impl Parse for Join {
 }
 
 fn destructure_nth_tuple_element(n: usize) -> proc_macro2::TokenStream {
-    let mut buffer = String::new();
+    "let (fut, ..) = &mut futures;".parse().unwrap()
+    // let mut buffer = String::new();
 
-    write!(&mut buffer, "let (fut, .. ) = &mut futures;").unwrap();
+    // write!(&mut buffer, "let (fut, .. ) = &mut futures;").unwrap();
 
-    for _ in 0..n {
-        write!(&mut buffer, "_,").unwrap();
-    }
+    // for _ in 0..n {
+    //     write!(&mut buffer, "_,").unwrap();
+    // }
 
-    write!(&mut buffer, "fut, ..) = &mut futures;").unwrap();
+    // write!(&mut buffer, "fut, ..) = &mut futures;").unwrap();
 
-    buffer.parse().unwrap()
+    // buffer.parse().unwrap()
 }
 
 pub(crate) fn join(input: TokenStream) -> TokenStream {

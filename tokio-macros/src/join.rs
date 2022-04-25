@@ -31,9 +31,11 @@ pub(crate) fn join(input: TokenStream) -> TokenStream {
     let futures_count = parsed.fut_exprs.len() as u32;
 
     let match_statement_branches = (0..futures_count).map(|i| {
+        let pos = syn::Index::from(i as usize);
+
         quote! {
-            #i => {
-                let fut = &mut futures.#i;
+            #pos => {
+                let fut = &mut futures.#pos;
 
                 // Safety: future is stored on the stack above
                 // and never moved.
@@ -48,8 +50,10 @@ pub(crate) fn join(input: TokenStream) -> TokenStream {
     });
 
     let ready_output = (0..futures_count).map(|i| {
+        let pos = syn::Index::from(i as usize);
+
         quote! {{
-          let fut = &mut futures.#i;
+          let fut = &mut futures.#pos;
 
             // Safety: future is stored on the stack above
             // and never moved.

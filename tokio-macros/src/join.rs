@@ -1,5 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
+use std::fmt::Write;
 use syn::parse::{Parse, ParseStream};
 use syn::{Expr, Token};
 
@@ -24,17 +25,33 @@ impl Parse for Join {
     }
 }
 
+fn destructure_nth_tuple_element(n: usize) -> String {
+    let mut buffer = String::new();
+
+    write!(&mut buffer, "let (fut, .. ) = &mut futures;").unwrap();
+
+    // for _ in 0..n {
+    //   write!(&mut buffer, "_,").unwrap();
+    // }
+
+    // write!(&mut buffer, "fut, ..) = &mut futures;").unwrap();
+
+    buffer
+}
+
 pub(crate) fn join(input: TokenStream) -> TokenStream {
     let parsed = syn::parse_macro_input!(input as Join);
 
     let futures_count = parsed.fut_exprs.len();
 
     let match_statement_branches = (0..futures_count).map(|i| {
-        let i = syn::Index::from(i);
+        let pos = syn::Index::from(i);
+
+        let get_tuple_element = destructure_nth_tuple_element(i);
 
         quote! {
-            #i => {
-                let fut = &mut futures.#i;
+            #pos => {
+                #get_tuple_element
 
                 // Safety: future is stored on the stack above
                 // and never moved.

@@ -52,7 +52,7 @@ pub(crate) fn join(input: TokenStream) -> TokenStream {
 
         quote! {
             #pos => {
-                #get_tuple_element
+                // #get_tuple_element
 
                 // Safety: future is stored on the stack above
                 // and never moved.

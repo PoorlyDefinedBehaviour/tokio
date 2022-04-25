@@ -25,19 +25,18 @@ impl Parse for Join {
     }
 }
 
-fn destructure_nth_tuple_element(n: usize) -> String {
-    return String::from("1;");
+fn destructure_nth_tuple_element(n: usize) -> proc_macro2::TokenStream {
     let mut buffer = String::new();
 
     write!(&mut buffer, "let (fut, .. ) = &mut futures;").unwrap();
 
-    // for _ in 0..n {
-    //   write!(&mut buffer, "_,").unwrap();
-    // }
+    for _ in 0..n {
+        write!(&mut buffer, "_,").unwrap();
+    }
 
-    // write!(&mut buffer, "fut, ..) = &mut futures;").unwrap();
+    write!(&mut buffer, "fut, ..) = &mut futures;").unwrap();
 
-    buffer
+    buffer.parse().unwrap()
 }
 
 pub(crate) fn join(input: TokenStream) -> TokenStream {
@@ -52,7 +51,7 @@ pub(crate) fn join(input: TokenStream) -> TokenStream {
 
         quote! {
             #pos => {
-                // #get_tuple_element
+                #get_tuple_element
 
                 // Safety: future is stored on the stack above
                 // and never moved.

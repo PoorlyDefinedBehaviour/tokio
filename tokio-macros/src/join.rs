@@ -26,6 +26,7 @@ impl Parse for Join {
 }
 
 fn destructure_nth_tuple_element(n: usize) -> String {
+    return String::from("1;");
     let mut buffer = String::new();
 
     write!(&mut buffer, "let (fut, .. ) = &mut futures;").unwrap();

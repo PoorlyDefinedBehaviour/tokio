@@ -41,38 +41,6 @@ fn destructure_nth_tuple_element(n: usize) -> proc_macro2::TokenStream {
     buffer.parse().unwrap()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn foo() {
-        for i in 0..5 {
-            let pos = syn::Index::from(i);
-
-            let get_tuple_element = destructure_nth_tuple_element(i);
-
-            println!(
-                "{}",
-                quote! {
-                    #pos => {
-                        #get_tuple_element
-
-                        // Safety: future is stored on the stack above
-                        // and never moved.
-                        let mut fut = unsafe { Pin::new_unchecked(fut) };
-
-                        // Try polling
-                        if fut.poll(cx).is_pending() {
-                            is_pending = true;
-                        }
-                    }
-                }
-            );
-        }
-    }
-}
-
 pub(crate) fn join(input: TokenStream) -> TokenStream {
     let parsed = syn::parse_macro_input!(input as Join);
 
@@ -100,10 +68,10 @@ pub(crate) fn join(input: TokenStream) -> TokenStream {
     });
 
     let ready_output = (0..futures_count).map(|i| {
-        let i = syn::Index::from(i);
+        let get_tuple_element = destructure_nth_tuple_element(i);
 
         quote! {{
-            let fut = &mut futures.#i;
+            #get_tuple_element
 
             // Safety: future is stored on the stack above
             // and never moved.

@@ -528,6 +528,8 @@ cfg_macros! {
     #[doc(hidden)]
     pub use tokio_macros::select_priv_clean_pattern;
 
+    pub use tokio_macros::join;
+
     cfg_rt! {
         #[cfg(feature = "rt-multi-thread")]
         #[cfg(not(test))] // Work around for rust-lang/rust#62127

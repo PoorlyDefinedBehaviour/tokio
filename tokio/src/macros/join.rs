@@ -104,8 +104,6 @@ macro_rules! join {
 
             skip_next_time = if skip + 1 == COUNT { 0 } else { skip + 1 };
 
-            println!("to_run={to_run}");
-
             // This loop runs twice and the first `skip` futures
             // are not polled in the first iteration.
             loop {
@@ -115,7 +113,7 @@ macro_rules! join {
                         // Every future has been polled
                         break;
                     }
-                    println!("to_run={to_run}");
+
                     to_run -= 1;
 
                     // Extract the future for this branch from the tuple.
